@@ -148,6 +148,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
     <ClCompile Include="Jewel.cpp" />
     <ClCompile Include="JewelsGrid.cpp" />
+    <ClCompile Include="LoadingScene.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +156,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
     <ClInclude Include="Jewel.h" />
     <ClInclude Include="JewelsGrid.h" />
+    <ClInclude Include="LoadingScene.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>

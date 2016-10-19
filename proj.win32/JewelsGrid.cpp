@@ -421,9 +421,107 @@ void JewelsGrid::onJewelsSwaping(float dt)
 	else
 	{
 		unschedule(schedule_selector(JewelsGrid::onJewelsSwaping));
+
+		if (canCrush())
+		{
+			m_jewelSelected = nullptr;
+
+			SimpleAudioEngine::getInstance()->playEffect("crush.ogg");
+			goCrush();
+
+			schedule(schedule_selector(JewelsGrid::onJewelsCrushing));
+		}
+		else
+		{
+			SimpleAudioEngine::getInstance()->playEffect("swapback.ogg");
+			swapJewels(m_jewelSelected, m_JewelSwaped);
+			schedule(schedule_selector(JewelsGrid::onJewelsSwapingBack));
+		}
 	}
 
+	
 }
+
+void JewelsGrid::onJewelsSwapingBack(float dt)
+{
+	//²¶×½ÊÇ·ñÍ£Ö¹
+	if (m_jewelSelected->isSwaping() || m_JewelSwaped->isSwaping())
+	{
+		return;
+	}
+	else
+	{
+		unschedule(schedule_selector(JewelsGrid::onJewelsSwapingBack));
+		m_jewelSelected = nullptr;
+		_eventDispatcher->resumeEventListenersForTarget(this);
+	}
+}
+
+void JewelsGrid::onJewelsCrushing(float dt)
+{
+	for (auto jewel : m_crushJewelsBox)
+	{
+		if (jewel->isCrushing())
+		{
+			return;
+		}		
+	}
+
+	unschedule(schedule_selector(JewelsGrid::onJewelsCrushing));
+
+	m_crushJewelsBox.clear();
+
+	refreshJewelsGrid();
+	schedule(schedule_selector(JewelsGrid::onJewelsRefreshing));
+}
+
+void JewelsGrid::onJewelsRefreshing(float dt)
+{
+	if (m_newJewelBox.size() != 0)
+	{
+		return;
+	}
+	else
+	{
+		unschedule(schedule_selector(JewelsGrid::onJewelsRefreshing));
+
+		if (canCrush())
+		{
+			SimpleAudioEngine::getInstance()->playEffect("crush.ogg");
+			goCrush();
+			schedule(schedule_selector(JewelsGrid::onJewelsCrushing));
+		}
+		else
+		{
+			if (isDeadMap())
+			{
+				auto winSize = Director::getInstance()->getWinSize();
+				auto label = Label::createWithTTF("Cant Crush Any More,Change!", "fonts/Marker Felt.ttf", 24);
+				label->setTextColor(Color4B::BLACK);
+				label->setOpacity(0);
+				this->getParent()->addChild(label);
+
+				auto fadein = FadeIn::create(0.5);
+				auto fadeout = FadeOut::create(0.5);
+
+				auto call = CallFunc::create([this, label]() {
+					do
+					{
+						updateMap();
+					} while (isDeadMap());
+					label->removeFromParent();
+					_eventDispatcher->resumeEventListenersForTarget(this);
+				});
+				label->runAction(Sequence::create(fadein, DelayTime::create(2), fadeout, call, nullptr));
+			}
+			else
+			{
+				_eventDispatcher->resumeEventListenersForTarget(this);
+			}
+		}
+	}
+}
+
 
 JewelsGrid::JewelsGrid()
 {
